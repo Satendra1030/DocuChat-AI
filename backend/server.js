@@ -1,4 +1,3 @@
-
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
@@ -32,7 +31,12 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 25 * 1024 * 1024, // 25MB
+    },
+});
 
 // ================================
 // STORE PDF TEXT
@@ -56,11 +60,33 @@ app.post("/upload", upload.single("pdf"), async (req, res) => {
     try {
         console.log("📄 PDF received");
 
+        // No file uploaded
+        if (!req.file) {
+            return res.status(400).json({
+                error: "No PDF uploaded.",
+            });
+        }
+
         const dataBuffer = fs.readFileSync("uploads/doc.pdf");
 
         const parsed = await pdfParse(dataBuffer);
 
         pdfText = cleanText(parsed.text);
+
+        // ================================
+        // INVALID PDF CHECK
+        // ================================
+        if (
+            !pdfText ||
+            pdfText.length < 100 ||
+            pdfText.includes("CamScanner")
+        ) {
+            pdfText = "";
+
+            return res.status(400).json({
+                error: "Invalid or empty PDF uploaded.",
+            });
+        }
 
         console.log("✅ PDF parsed successfully");
         console.log(`📚 PDF Length: ${pdfText.length} characters`);
@@ -68,8 +94,11 @@ app.post("/upload", upload.single("pdf"), async (req, res) => {
         res.json({
             message: "PDF uploaded and processed successfully",
         });
+
     } catch (err) {
         console.error("❌ Upload Error:", err);
+
+        pdfText = "";
 
         res.status(500).json({
             error: err.message,
@@ -86,6 +115,9 @@ app.post("/ask", async (req, res) => {
 
         console.log("❓ Question:", question);
 
+        // ================================
+        // VALID PDF CHECK
+        // ================================
         if (
             !pdfText ||
             pdfText.length < 100 ||
@@ -96,6 +128,14 @@ app.post("/ask", async (req, res) => {
                     "❌ Please upload a valid PDF before asking questions.",
             });
         }
+
+        // Empty question
+        if (!question || !question.trim()) {
+            return res.status(400).json({
+                error: "Please enter a question.",
+            });
+        }
+
         // ================================
         // SMART PROMPT
         // ================================
@@ -197,6 +237,7 @@ IMPORTANT:
 - Sound like premium educational software
 - Do NOT sound robotic
 `;
+
         // ================================
         // GROQ AI REQUEST
         // ================================
@@ -228,6 +269,7 @@ IMPORTANT:
         console.log("✅ Answer generated");
 
         res.json({ answer });
+
     } catch (err) {
         console.error("❌ Ask Error:", err);
 

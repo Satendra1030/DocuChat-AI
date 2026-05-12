@@ -7,13 +7,16 @@ function App() {
   const [question, setQuestion] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [answer, setAnswer] = useState("");
-  const [displayedAnswer, setDisplayedAnswer] = useState("");
+  const [displayedAnswer, setDisplayedAnswer] =
+    useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [fileName, setFileName] = useState("");
-  const [dragActive, setDragActive] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [dragActive, setDragActive] =
+    useState(false);
+  const [darkMode, setDarkMode] =
+    useState(true);
 
   // =========================================
   // THEME
@@ -31,9 +34,7 @@ function App() {
       ? "rgba(15, 23, 42, 0.95)"
       : "#ffffff",
 
-    text: darkMode
-      ? "#ffffff"
-      : "#0f172a",
+    text: darkMode ? "#ffffff" : "#0f172a",
 
     secondary: darkMode
       ? "#94a3b8"
@@ -53,6 +54,14 @@ function App() {
   // =========================================
   const uploadPDF = async (selectedFile) => {
     if (!selectedFile) return;
+
+    // ONLY PDF VALIDATION
+    if (
+      selectedFile.type !== "application/pdf"
+    ) {
+      setError("Please upload a PDF file only.");
+      return;
+    }
 
     setFileName(selectedFile.name);
     setStatus("Uploading and processing PDF...");
@@ -74,15 +83,21 @@ function App() {
 
     } catch (err) {
       const msg =
-        err.response?.data?.error || err.message;
+        err.response?.data?.error ||
+        err.message;
 
       setError(msg);
       setStatus("");
+      setAnswer("");
+      setDisplayedAnswer("");
 
       console.error(err);
     }
   };
 
+  // =========================================
+  // FILE INPUT
+  // =========================================
   const handleFileUpload = async (e) => {
     const selectedFile = e.target.files[0];
 
@@ -90,10 +105,13 @@ function App() {
   };
 
   // =========================================
-  // HANDLE ASK
+  // ASK AI
   // =========================================
   const handleAsk = async () => {
-    if (!question.trim()) return;
+    if (!question.trim()) {
+      setError("Please enter a question.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -110,6 +128,7 @@ function App() {
 
       setAnswer(aiAnswer);
 
+      // CHAT HISTORY
       setChatHistory((prev) => [
         {
           question,
@@ -120,7 +139,9 @@ function App() {
 
       setQuestion("");
 
-      // STREAMING EFFECT
+      // =========================================
+      // TYPING EFFECT
+      // =========================================
       let displayedText = "";
 
       const words = aiAnswer.split(" ");
@@ -131,15 +152,19 @@ function App() {
         setDisplayedAnswer(displayedText);
 
         await new Promise((resolve) =>
-          setTimeout(resolve, 25)
+          setTimeout(resolve, 20)
         );
       }
 
     } catch (err) {
       const msg =
-        err.response?.data?.error || err.message;
+        err.response?.data?.error ||
+        err.message;
 
       setError(msg);
+
+      setAnswer("");
+      setDisplayedAnswer("");
 
       console.error(err);
 
@@ -152,7 +177,10 @@ function App() {
   // ENTER SUPPORT
   // =========================================
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey
+    ) {
       e.preventDefault();
       handleAsk();
     }
@@ -175,7 +203,8 @@ function App() {
 
     setDragActive(false);
 
-    const selectedFile = e.dataTransfer.files[0];
+    const selectedFile =
+      e.dataTransfer.files[0];
 
     uploadPDF(selectedFile);
   };
@@ -194,10 +223,8 @@ function App() {
 
     doc.setFontSize(12);
 
-    const splitText = doc.splitTextToSize(
-      answer,
-      170
-    );
+    const splitText =
+      doc.splitTextToSize(answer, 170);
 
     doc.text(splitText, 20, 40);
 
@@ -210,7 +237,8 @@ function App() {
         minHeight: "100vh",
         background: theme.background,
         color: theme.text,
-        fontFamily: "Arial, sans-serif",
+        fontFamily:
+          "Arial, sans-serif",
         padding: "30px",
         transition: "0.3s",
       }}
@@ -235,7 +263,8 @@ function App() {
             height: "90vh",
             overflowY: "auto",
             border: `1px solid ${theme.border}`,
-            boxShadow: "0 10px 40px rgba(0,0,0,0.35)",
+            boxShadow:
+              "0 10px 40px rgba(0,0,0,0.35)",
             position: "sticky",
             top: "20px",
           }}
@@ -250,39 +279,67 @@ function App() {
           </h2>
 
           {chatHistory.length === 0 ? (
-            <p style={{ color: theme.secondary }}>
+            <p
+              style={{
+                color: theme.secondary,
+              }}
+            >
               No chats yet
             </p>
           ) : (
-            chatHistory.map((chat, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  setQuestion(chat.question);
-                  setAnswer(chat.answer);
-                  setDisplayedAnswer(chat.answer);
-                }}
-                style={{
-                  background: theme.input,
-                  padding: "15px",
-                  borderRadius: "14px",
-                  marginBottom: "12px",
-                  cursor: "pointer",
-                  border: `1px solid ${theme.border}`,
-                }}
-              >
-                <p
+            chatHistory.map(
+              (chat, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setQuestion(
+                      chat.question
+                    );
+
+                    setAnswer(
+                      chat.answer
+                    );
+
+                    setDisplayedAnswer(
+                      chat.answer
+                    );
+                  }}
                   style={{
-                    margin: 0,
-                    color: theme.text,
-                    fontWeight: "bold",
-                    lineHeight: "1.5",
+                    background:
+                      theme.input,
+
+                    padding: "15px",
+
+                    borderRadius:
+                      "14px",
+
+                    marginBottom:
+                      "12px",
+
+                    cursor: "pointer",
+
+                    border: `1px solid ${theme.border}`,
                   }}
                 >
-                  {chat.question.slice(0, 45)}...
-                </p>
-              </div>
-            ))
+                  <p
+                    style={{
+                      margin: 0,
+                      color: theme.text,
+                      fontWeight:
+                        "bold",
+                      lineHeight:
+                        "1.5",
+                    }}
+                  >
+                    {chat.question.slice(
+                      0,
+                      45
+                    )}
+                    ...
+                  </p>
+                </div>
+              )
+            )
           )}
         </div>
 
@@ -293,10 +350,21 @@ function App() {
           <div
             style={{
               display: "flex",
-              justifyContent: "flex-end",
+              justifyContent:
+                "space-between",
+              alignItems: "center",
               marginBottom: "20px",
             }}
           >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "22px",
+              }}
+            >
+              📄 DocuChat AI
+            </h2>
+
             <button
               onClick={() =>
                 setDarkMode(!darkMode)
@@ -335,8 +403,10 @@ function App() {
                 fontWeight: "800",
                 background:
                   "linear-gradient(to right, #60a5fa, #a78bfa)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                WebkitBackgroundClip:
+                  "text",
+                WebkitTextFillColor:
+                  "transparent",
               }}
             >
               📄 DocuChat AI
@@ -348,7 +418,9 @@ function App() {
                 fontSize: "20px",
               }}
             >
-              Upload PDFs and interact with your documents using AI
+              Upload PDFs and interact
+              with your documents using
+              AI
             </p>
           </div>
 
@@ -356,22 +428,46 @@ function App() {
           {error && (
             <div
               style={{
-                background: "rgba(127, 29, 29, 0.9)",
+                background:
+                  "rgba(127, 29, 29, 0.9)",
                 color: "#fecaca",
                 padding: "18px",
                 borderRadius: "16px",
                 marginBottom: "25px",
-                border: "1px solid #ef4444",
+                border:
+                  "1px solid #ef4444",
               }}
             >
               ❌ {error}
             </div>
           )}
 
+          {/* STATUS */}
+          {status && (
+            <div
+              style={{
+                marginBottom: "25px",
+                background:
+                  "rgba(8, 47, 73, 0.9)",
+                color: "#7dd3fc",
+                padding: "15px",
+                borderRadius: "14px",
+                border:
+                  "1px solid #0ea5e9",
+              }}
+            >
+              ✅ {status}
+            </div>
+          )}
+
           {/* UPLOAD CARD */}
           <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
+            onDragOver={
+              handleDragOver
+            }
+            onDragLeave={
+              handleDragLeave
+            }
             onDrop={handleDrop}
             style={{
               background: dragActive
@@ -383,9 +479,14 @@ function App() {
                 : `1px solid ${theme.border}`,
 
               padding: "35px",
+
               borderRadius: "28px",
+
               marginBottom: "30px",
-              backdropFilter: "blur(12px)",
+
+              backdropFilter:
+                "blur(12px)",
+
               boxShadow:
                 "0 10px 40px rgba(0,0,0,0.35)",
             }}
@@ -401,16 +502,21 @@ function App() {
 
             <div
               style={{
-                border: "2px dashed #60a5fa",
+                border:
+                  "2px dashed #60a5fa",
+
                 borderRadius: "20px",
+
                 padding: "40px",
+
                 textAlign: "center",
               }}
             >
               <p
                 style={{
                   marginBottom: "20px",
-                  color: theme.secondary,
+                  color:
+                    theme.secondary,
                   fontSize: "18px",
                 }}
               >
@@ -419,15 +525,28 @@ function App() {
 
               <label
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
+                  display:
+                    "inline-flex",
+
+                  alignItems:
+                    "center",
+
                   gap: "10px",
-                  padding: "16px 28px",
+
+                  padding:
+                    "16px 28px",
+
                   background:
                     "linear-gradient(to right, #2563eb, #7c3aed)",
-                  borderRadius: "16px",
+
+                  borderRadius:
+                    "16px",
+
                   cursor: "pointer",
-                  fontWeight: "bold",
+
+                  fontWeight:
+                    "bold",
+
                   fontSize: "16px",
                 }}
               >
@@ -436,7 +555,9 @@ function App() {
                 <input
                   type="file"
                   accept=".pdf"
-                  onChange={handleFileUpload}
+                  onChange={
+                    handleFileUpload
+                  }
                   hidden
                 />
               </label>
@@ -447,29 +568,15 @@ function App() {
                 style={{
                   marginTop: "20px",
                   padding: "15px",
-                  background: theme.input,
-                  borderRadius: "14px",
+                  background:
+                    theme.input,
+                  borderRadius:
+                    "14px",
                   color: theme.text,
                   border: `1px solid ${theme.border}`,
                 }}
               >
                 📄 {fileName}
-              </div>
-            )}
-
-            {status && (
-              <div
-                style={{
-                  marginTop: "20px",
-                  background:
-                    "rgba(8, 47, 73, 0.9)",
-                  color: "#7dd3fc",
-                  padding: "15px",
-                  borderRadius: "14px",
-                  border: "1px solid #0ea5e9",
-                }}
-              >
-                ✅ {status}
               </div>
             )}
           </div>
@@ -481,7 +588,8 @@ function App() {
               border: `1px solid ${theme.border}`,
               padding: "35px",
               borderRadius: "28px",
-              backdropFilter: "blur(12px)",
+              backdropFilter:
+                "blur(12px)",
               boxShadow:
                 "0 10px 40px rgba(0,0,0,0.35)",
             }}
@@ -500,20 +608,26 @@ function App() {
               placeholder="Ask anything about your PDF..."
               value={question}
               onChange={(e) =>
-                setQuestion(e.target.value)
+                setQuestion(
+                  e.target.value
+                )
               }
-              onKeyDown={handleKeyDown}
+              onKeyDown={
+                handleKeyDown
+              }
               style={{
                 width: "100%",
                 padding: "20px",
                 borderRadius: "18px",
                 border: `1px solid ${theme.border}`,
-                background: theme.input,
+                background:
+                  theme.input,
                 color: theme.text,
                 fontSize: "16px",
                 resize: "none",
                 outline: "none",
-                boxSizing: "border-box",
+                boxSizing:
+                  "border-box",
                 lineHeight: "1.8",
               }}
             />
@@ -529,9 +643,13 @@ function App() {
                 background: loading
                   ? "#475569"
                   : "linear-gradient(to right, #2563eb, #7c3aed)",
+
                 color: "white",
+
                 fontSize: "17px",
+
                 fontWeight: "700",
+
                 cursor: loading
                   ? "not-allowed"
                   : "pointer",
@@ -560,7 +678,8 @@ function App() {
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
+                  justifyContent:
+                    "space-between",
                   alignItems: "center",
                   marginBottom: "25px",
                 }}
@@ -577,13 +696,19 @@ function App() {
                 <button
                   onClick={exportPDF}
                   style={{
-                    padding: "12px 20px",
+                    padding:
+                      "12px 20px",
                     border: "none",
-                    borderRadius: "12px",
+                    borderRadius:
+                      "12px",
                     background:
                       "linear-gradient(to right, #059669, #10b981)",
+
                     color: "white",
-                    fontWeight: "bold",
+
+                    fontWeight:
+                      "bold",
+
                     cursor: "pointer",
                   }}
                 >

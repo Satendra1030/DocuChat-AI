@@ -66,7 +66,7 @@ function App() {
       formData.append("pdf", selectedFile);
 
       const res = await axios.post(
-        "http://localhost:5001/upload",
+        "https://docuchat-backend-2rbd.onrender.com/upload",
         formData
       );
 
@@ -102,7 +102,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5001/ask",
+        "https://docuchat-backend-2rbd.onrender.com/ask",
         { question }
       );
 

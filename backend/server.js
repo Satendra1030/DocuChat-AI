@@ -86,12 +86,16 @@ app.post("/ask", async (req, res) => {
 
         console.log("❓ Question:", question);
 
-        if (!pdfText) {
+        if (
+            !pdfText ||
+            pdfText.length < 100 ||
+            pdfText.includes("CamScanner")
+        ) {
             return res.status(400).json({
-                error: "Please upload a PDF first",
+                error:
+                    "❌ Please upload a valid PDF before asking questions.",
             });
         }
-
         // ================================
         // SMART PROMPT
         // ================================
@@ -110,7 +114,7 @@ Your task:
 
 ==========================
 PDF CONTENT:
-${pdfText.slice(0, 15000)}
+${pdfText.slice(0, 580000)}
 ==========================
 
 USER QUESTION:

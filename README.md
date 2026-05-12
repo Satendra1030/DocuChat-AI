@@ -35,7 +35,7 @@
 - pdf-parse
 - Groq SDK
 
-  # 🔗Live Demo
+ # 🔗Live Demo
   https://docu-chat-ai-virid.vercel.app/
 
 # 📂 Project Structure

@@ -196,7 +196,7 @@ function App() {
           </header>
 
           <section className="hero">
-            <h1>DocuChat AI</h1>
+            <h1>NeuroNotes AI</h1>
             <p>Upload a PDF, then ask focused questions about its contents.</p>
           </section>
 

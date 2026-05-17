@@ -184,7 +184,7 @@ function App() {
 
         <main className="main-panel">
           <header className="topbar">
-            <h2 className="topbar-title">DocuChat AI</h2>
+            <h2 className="topbar-title">NeuroNotes AI</h2>
 
             <button
               className="theme-toggle"

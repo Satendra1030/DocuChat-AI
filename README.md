@@ -1,4 +1,4 @@
-# 📄 DocuChat AI
+# 📄 NeuroNotes AI
  AI-powered PDF chat application that lets users upload documents and ask questions using advanced AI.
   Built with React, Node.js, Express, Groq AI, and modern glassmorphism UI.
 
